@@ -1,19 +1,58 @@
 package org.PC;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.Enumeration;
 
 public class QRCodeGenerator {
-
     /** Public API --------------------------------------------------- */
-    public static boolean createQRCode() {
-        
+    public static boolean createQRCode(int port, String secretKey) {
+        try {
+            NetworkInfo info = getActiveNetworkInfo();
+            if(info == null) { System.err.println("QRCodeGenerator Error: 활성화된 네트워크 어댑터를 찾을 수 없습니다."); return false; }
+
+            Data data = new Data(info, port, secretKey);
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String jsonString = gson.toJson(data);
+
+            System.out.println(jsonString);
+
+            generatorQRCodeImage(jsonString, "C:\\Users\\jeche\\OneDrive\\Documents\\QR.png");
+
+            return true;
+
+        } catch (SocketException e) {
+            System.err.println("네트워크 오류"); return false;
+        } catch (WriterException e) {
+            System.err.println("QR코드 생성 오류"); return false;
+        } catch (IOException e) {
+            System.err.println("파일 저장 오류"); return false;
+        }
     }
 
     /** -------------------------------------------------------------- */
 
+
+
+    private static void generatorQRCodeImage(String text, String filePath) throws WriterException, IOException{
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 400, 400);
+        Path path = FileSystems.getDefault().getPath(filePath);
+        MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+    }
 
     /**
      * 
@@ -51,7 +90,7 @@ public class QRCodeGenerator {
         if (mac == null || mac.length == 0) return null;
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < mac.length; i++) {
-            stringBuilder.append(String.format("02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+            stringBuilder.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
         }
         return stringBuilder.toString();
     }
