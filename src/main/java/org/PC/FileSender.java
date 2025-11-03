@@ -86,7 +86,7 @@ public class FileSender {
             dos.writeUTF(file.getName());
             // 파일 크기 전송
             dos.writeLong(file.length());
-            // 파일 본문 전송
+            // 파일 본문 전송 <- 여기다가 암호화 추가 예정 (따로 클래스를 분리시킬꺼임)
             byte[] buffer = new byte[4096];
             int bytesRead;
             long totalSent = 0;
