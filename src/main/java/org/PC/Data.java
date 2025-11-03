@@ -33,6 +33,7 @@ public class Data {
         }
     }
 
+    /** getter 부분 */
     public String getMacAddress() { return this.macAddress; }
     public String getIp() { return this.ip; }
     public Integer getPort() { return this.port; }
