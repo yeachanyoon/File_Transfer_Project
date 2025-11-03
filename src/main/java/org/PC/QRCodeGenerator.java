@@ -7,38 +7,41 @@ import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import java.awt.image.BufferedImage;
 
-import java.io.IOException;
 import java.nio.file.FileSystems;
-import java.nio.file.Path;
 
 public class QRCodeGenerator {
-    /** Public API --------------------------------------------------- */
-    public static boolean createQRCode(Data data) {
+
+    /**
+     * 주어진 Data를 이용해 QRCode 만드는 메세지
+     * @param data
+     * @return BufferedImage (QRCode)
+     */
+    public static BufferedImage createQRCode(Data data) {
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String jsonString = gson.toJson(data);
 
             System.out.println(jsonString);
 
-            generatorQRCodeImage(jsonString, "C:\\Users\\jeche\\OneDrive\\Documents\\QR.png");
-
-            return true;
+            return generatorQRCodeImage(jsonString);
 
         } catch (WriterException e) {
-            System.err.println("QR코드 생성 오류"); return false;
-        } catch (IOException e) {
-            System.err.println("파일 저장 오류"); return false;
+            System.err.println("QR코드 생성 오류"); return null;
         }
     }
 
-    /** -------------------------------------------------------------- */
 
-    private static void generatorQRCodeImage(String text, String filePath) throws WriterException, IOException{
+    /**
+     * 문자열을 BufferedImage형식의 QR 이미지로 만듭니다
+     * @param String text
+     * @return BufferedImage (QRCode)
+    */
+    private static BufferedImage generatorQRCodeImage(String text) throws WriterException {
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 400, 400);
-        Path path = FileSystems.getDefault().getPath(filePath);
-        MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+        return MatrixToImageWriter.toBufferedImage(bitMatrix);
     }
 
 }
