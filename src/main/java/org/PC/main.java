@@ -23,8 +23,9 @@ public class main extends JFrame {
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "파일 전송하기 버튼 클릭");
-                // 여기에 파일 전송 로직을 추가할 예정
+                // 여기에 파일 전송 로직을 추가
+                FileSender fileSender = new FileSender();
+                fileSender.initiateFileTransfer(main.this);
             }
         });
         panel.add(sendButton);
@@ -35,8 +36,7 @@ public class main extends JFrame {
         receiveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "파일 전송받기 버튼 클릭");
-                // 여기에 파일 전송받기 로직을 추가할 예정
+                // 여기에 파일 전송받기 로직을 추가
             }
         });
         panel.add(receiveButton);
