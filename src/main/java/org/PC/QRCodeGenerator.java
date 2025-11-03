@@ -14,14 +14,23 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Enumeration;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
 public class QRCodeGenerator {
+    private static final int port = 8080;
     /** Public API --------------------------------------------------- */
-    public static boolean createQRCode(int port, String secretKey) {
+    public static boolean createQRCode() {
         try {
             NetworkInfo info = getActiveNetworkInfo();
-            if(info == null) { System.err.println("QRCodeGenerator Error: 활성화된 네트워크 어댑터를 찾을 수 없습니다."); return false; }
+            if(info == null) { System.err.println("NetworkInfo Error: 활성화된 네트워크 어댑터를 찾을 수 없습니다."); return false; }
+
+            String secretKey = generateSecretKey();
+            if(secretKey == null) {System.err.println("SecretKey Error: 비밀 키 생성에 실패하였습니다."); return false; }
 
             Data data = new Data(info, port, secretKey);
 
@@ -53,6 +62,22 @@ public class QRCodeGenerator {
         Path path = FileSystems.getDefault().getPath(filePath);
         MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
     }
+    /**
+     * AES-256 암호화에 사용할 안전한 비밀 키를 생성하고 Base64 문자열로 인코딩합니다.
+     * @return Base64로 인코딩된 SecretKey(String)
+     */
+    private static String generateSecretKey() {
+        try {
+            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+            keyGen.init(256);
+            SecretKey secretKey = keyGen.generateKey();
+            return Base64.getEncoder().encodeToString(secretKey.getEncoded());
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
+    } 
+
 
     /**
      * 
